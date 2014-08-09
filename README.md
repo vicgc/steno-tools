@@ -1,4 +1,4 @@
 steno-tools
 ===========
 
-Diverse Python Tools um das optimalste Tastatur Layout zu errechnen
+Diverse Python Tools um das optimalste Tastatur Layout für eine deutsche Steno-Tastatur zu errechnen
