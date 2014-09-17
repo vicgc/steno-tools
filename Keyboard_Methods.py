@@ -1,19 +1,24 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """
-Diverse Funktionen und Keyboard-Klasse für die Überprüfung von einem Korpus Wörtern
-konvertiert in misshandeltes IPA und Kompatibilität mit Keyboard
+
+Diverse Funktionen und Keyboard-Klasse für die Überprüfung von einem Korpus
+Wörtern
+
+konvertiert in misshandeltes IPA und überprüft Kompatibilität mit Keyboard
+
 """
 import copy
+import re
 
 # Reg-Ex-Dictionary für IPA-Aufbereitung noch vor Umwandlung in Keyboard-Zeichen
-reg_ex_dict={\
-    "ɪç$":"ɪg",\
+additional_substitutions={\
     "ʒ":"ʃ", \
     "x":"ç", \
     "ʀ":"r", \
     "ʁ":"r", \
-    "ə":"ɛ" \
+    "ə":"ɛ", \
+    "z":"s"  \
     }
 
 # Dictionary um Diphthongs von IPA in Keyboard-Zeichen umzuwandeln
@@ -25,24 +30,39 @@ ipa_to_keyboard_diph = {\
     "ɔʏ":"Ö"\
     }
 
-# Dictionary um Vokale von IPA in Keyboard-Zeichen umzuwandeln ohne Diphthongs!
-ipa_to_keyboard_v = {\
-    "a":"a", \
+# Dictionary um 2-stellige Vokale von IPA in Keyboard-Zeichen umzuwandeln ohne Diphthongs!
+ipa_to_keyboard_v2 = {\
     "aː":"A", \
-    "ɛ":"ɛ", \
     "eː":"E", \
-    "ɪ":"ɪ", \
     "iː":"I", \
-    "ɔ":"ɔ", \
     "oː":"O", \
-    "ʊ":"ʊ", \
     "uː":"U", \
     "ɛː":"ä", \
-    "œ":"œ", \
     "øː":"ø", \
-    "ʏ":"ʏ", \
     "yː":"Y" \
     }
+# Dictionary um 1-stellige Vokale von IPA in Keyboard-Zeichen umzuwandeln ohne Diphthongs!
+ipa_to_keyboard_v1 = {\
+    "a":"a", \
+    "ɛ":"ɛ", \
+    "ɪ":"ɪ", \
+    "ɔ":"ɔ", \
+    "ʊ":"ʊ", \
+    "œ":"œ", \
+    "ʏ":"ʏ", \
+    }
+
+# Dictionary um 1-stellige Konsonanten von IPA in Keyboard-Zeichen umzuwandeln -nur die die abweichen
+ipa_to_keyboard_k = {\
+    "z":"s", \
+    "ɛ":"ɛ", \
+    "ɪ":"ɪ", \
+    "ɔ":"ɔ", \
+    "ʊ":"ʊ", \
+    "œ":"œ", \
+    "ʏ":"ʏ", \
+    }
+
 
 # Dictionary um Vokale von Keyboard-Zeichen in IPA umzuwandeln
 keyboard_to_ipa_v = {
@@ -163,7 +183,6 @@ def valid(input):
     max_length_counter2 = len(input)
     max_length_counter1 = max_length_counter2 - 1
     
-    
     while counter1 < max_length_counter1 :
         counter2 = counter1 + 1
         while counter2 < max_length_counter2:
@@ -261,11 +280,26 @@ def partial_layouts_complete_cycle(start_val, max):
         counter += 1
     return copy.deepcopy(back)
 
-
-
+# Funktion wandelt IPA String (nach Leipziger Variante) in Keyboard-Layout um:
+def ipa_to_keyb(ipa_string):
+    keyb  = copy.deepcopy(ipa_string)
+    # zuerst doppelte Zeichen ersetzen, Beginn mit Diphthongs
+    for key in ipa_to_keyboard_diph.keys():
+        keyb = keyb.replace(key, ipa_to_keyboard_diph[key])
+    # dann doppelte Zeichen die kein Diphthongs sind
+    for key in ipa_to_keyboard_v2.keys():
+        keyb = keyb.replace(key, ipa_to_keyboard_v2[key])
+    # einzelne Zeichen wie Anfang von "Dschungel"
+    for key in additional_substitutions.keys():
+        keyb = keyb.replace(key, additional_substitutions[key])
+    return keyb    
+    
 
 """
-Klasse um die Tastatur abzubilden mit links 7 Tasten rechts 10 und 4 Tasten für die Vokale
+===============================================================================
+Klasse um die Tastatur abzubilden mit links 7 Tasten rechts 10 und 4 Tasten für
+die Vokale
+===============================================================================
 """
 class Steno_Keyboard:
 
@@ -336,7 +370,7 @@ class Steno_Keyboard:
             back.append(value_k[i])
         return back        
     
-# Rückgabe als komplette Werte-Liste    
+# Rückgabe als komplette Werte-Liste als Integer    
     def values_list(self):
         back = []
         for i in self.l_keys:
@@ -347,7 +381,7 @@ class Steno_Keyboard:
             back.append(i)
         return back
         
-# Rückgabe als komplette Werte-Liste    
+# Rückgabe als komplette Werte-Liste als String    
     def values_str(self):
         back = self.values_list()
         string_back = ""
@@ -536,7 +570,7 @@ class Steno_Keyboard:
                 else:
                     uebertrag = 0
                     break
-        # Falls immer noch ein Übertrag vorhanden ist (also Zahlenüberlauf) dann nochmal die Funktion aufrufen
+        # Falls immer noch ein Übertrag vorhanden ist (also Zahlenüberlauf) dann alles auf Null setzen
         if uebertrag ==1:
             for i in self.l_keys:
                 i = 0
@@ -558,16 +592,12 @@ class Steno_Keyboard:
     def valid_r(self):
         return valid(self.r_keys)
     
-    # Tastatur auf Gültigkeit überprüfen
-    def valid(self): #keyboard_layout_valid(self):
+    # Komplette Tastatur auf Gültigkeit überprüfen
+    def valid(self):
         if self.valid_l() == self.valid_m() == self.valid_r() == True:
             return True
         else:
             return False
         
         #for counter < len(l_keys):
-    
-    
-    
-    
     
