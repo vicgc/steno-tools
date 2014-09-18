@@ -433,15 +433,18 @@ class Steno_Keyboard:
 # Operatoren überladen usw
     # Schöne Zusammenfassung
     def __repr__(self):
-        rueck = "Tastatur in Werten: " + str(self.values()) +"\n"
-        rueck += "Tastatur in Keyboard-Layout: " + str(self.keyb()) + "\n"
-        rueck += "Tastatur in IPA: " + str(self.ipa()) + "\n"
-        rueck += "Aktueller Counterstand: " + str(self.vote())
+        rueck = "Tastatur in Werten: " + str(self.values_str()) +"\n"
+        rueck += "Tastatur in Keyboard-Layout: " + str(self.keyb_str()) + "\n"
+        rueck += "Tastatur in IPA: " + str(self.ipa_str()) + "\n"
+        rueck += "Aktueller Counterstand:\n    1x: " + str(self.vote1) +\
+            "\n    2x: " + str(self.vote2) +\
+            "\n    3x: " + str(self.vote3) +\
+            "\n    4x: " + str(self.vote4) + "\n"
         return rueck
         
     # Ausgabe für print() in IPA
     def __str__(self):
-        return self.ipa()
+        return self.ipa_list()
     
     # "=" überladen: Vergleich ob zwei Tastaturlayouts gleich sind, vote ist egal
     def __eq__(self,  other):
@@ -600,4 +603,120 @@ class Steno_Keyboard:
             return False
         
         #for counter < len(l_keys):
+    
+"""
+================================================================================
+Weitere Funktionen z.B. um Keyboard-Layouts zu speichern und wieder zu laden in Textfiles
+================================================================================
+"""
+# Funktion um Keyboard-Layouts aus einem File zu lesen
+def read_keyboards_from_file(file_name, vote1 = True, vote2 = True, vote3 = True,  vote4 = True):
+    
+    # Checken ob sich Datei öffnen lässt, sonst abbrechen
+    try:
+        filehandle = open(file_name, "r")
+    except:
+        print ("Datei gibts nicht, ich mach hier gar nix!")
+        return []
+    
+    # File alles auf einmal einlesen und Datei wieder schließen
+    file_content = filehandle.read()
+    filehandle.close()
+    
+    # File in einzelne Zeilen aufsplitten
+    keybs = file_content.split(chr(10))
+    
+    # Leeren Array für Weiterverarbeitung
+    rueck = []
+    
+    # Jede Zeile in einzelne Strings aufspalten getrennt durch ";"
+    for line in keybs:
+        str_split = line.split(";")
+        rueck.append(str_split)
+    print (rueck)
+    print ("\n")
+    print (rueck[0])
+    print (rueck[1])
+    print (rueck[2])
+    print (rueck[3])
+    # Leeren Array für Weiterverarbeitung
+    rueck_keybds = []
+    counter = 0
+    
+    while counter < len(rueck):
+        if rueck[counter] != ['']:
+            temp_keyb = Steno_Keyboard(\
+                [int(rueck[counter][0]),
+                    int(rueck[counter][1]),\
+                    int(rueck[counter][2]),\
+                    int(rueck[counter][3]),\
+                    int(rueck[counter][4]),\
+                    int(rueck[counter][5]),\
+                    int(rueck[counter][6])], 
+                [int(rueck[counter][7]),\
+                    int(rueck[counter][8]),\
+                    int(rueck[counter][9]),\
+                    int(rueck[counter][10])], 
+                [int(rueck[counter][11]),\
+                    int(rueck[counter][12]),\
+                    int(rueck[counter][13]),\
+                    int(rueck[counter][14]),\
+                    int(rueck[counter][15]),\
+                    int(rueck[counter][16]),\
+                    int(rueck[counter][17]),\
+                    int(rueck[counter][18]),\
+                    int(rueck[counter][19]),\
+                    int(rueck[counter][20])]\
+                )
+            if (vote1):
+                temp_keyb.vote1 = int(rueck[counter][21])
+            if (vote2):
+                temp_keyb.vote1 = int(rueck[counter][22])
+            if (vote3):
+                temp_keyb.vote1 = int(rueck[counter][23])
+            if (vote4):
+                temp_keyb.vote1 = int(rueck[counter][24])
+            
+            rueck_keybds.append(temp_keyb)       
+        
+        counter += 1
+        
+    return copy.deepcopy(rueck_keybds)
+    
+#Funktion um Keyboard-Layouts in ein File zu dumpen
+def write_keyboards_to_file(file_name, keyboard_layouts):
+    
+    # Checken ob sich Datei öffnen lässt, sonst abbrechen
+    try:
+        filehandle = open(file_name, "a")
+    except:
+        print ("Datei gibts nicht, ich mach hier gar nix!")
+        return False
+    
+    for layouts in keyboard_layouts:
+        
+        # Zu speichernde String zusammen bauen
+        temp_string = ""
+        for numbers in layouts.l_keys:
+            temp_string += str(numbers)
+            temp_string += ";"
+        for numbers in layouts.m_keys:
+            temp_string += str(numbers)
+            temp_string += ";"
+        for numbers in layouts.r_keys:
+            temp_string += str(numbers)
+            temp_string += ";"
+        temp_string += str(layouts.vote1)
+        temp_string += ";"
+        temp_string += str(layouts.vote2)
+        temp_string += ";"
+        temp_string += str(layouts.vote3)
+        temp_string += ";"
+        temp_string += str(layouts.vote4)
+        temp_string += "\n"
+        
+        # String speichern
+        filehandle.write(temp_string)
+        
+    return True
     
