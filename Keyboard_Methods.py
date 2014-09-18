@@ -633,12 +633,7 @@ def read_keyboards_from_file(file_name, vote1 = True, vote2 = True, vote3 = True
     for line in keybs:
         str_split = line.split(";")
         rueck.append(str_split)
-    print (rueck)
-    print ("\n")
-    print (rueck[0])
-    print (rueck[1])
-    print (rueck[2])
-    print (rueck[3])
+
     # Leeren Array für Weiterverarbeitung
     rueck_keybds = []
     counter = 0
@@ -694,7 +689,7 @@ def write_keyboards_to_file(file_name, keyboard_layouts):
         return False
     
     for layouts in keyboard_layouts:
-        
+
         # Zu speichernde String zusammen bauen
         temp_string = ""
         for numbers in layouts.l_keys:
